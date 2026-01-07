@@ -21,7 +21,7 @@ console.log("MiniKit:", window.MiniKit);
 alert("MiniKit installed? " + window.MiniKit?.isInstalled());
 
   const { finalPayload } =
-    await MiniKit.commandsAsync.verify(verifyPayload);
+    await MiniKit.commands.verify(verifyPayload);
 
   if (finalPayload.status === "error") {
     out.textContent = JSON.stringify(finalPayload, null, 2);
