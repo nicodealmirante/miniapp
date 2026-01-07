@@ -1,3 +1,6 @@
+console.log("MiniKit:", window.MiniKit);
+alert("MiniKit installed? " + window.MiniKit?.isInstalled());
+
 const verifyPayload = {
   action: "wldairdrop",
   signal: "session-1",
