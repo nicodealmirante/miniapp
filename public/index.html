@@ -1,133 +1,93 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Selfie Mirror MiniApp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      background:#111;
-      color:#fff;
-      font-family:system-ui, sans-serif;
-      text-align:center;
-      padding:24px;
-    }
-    h2 { margin-bottom: 20px; }
-    button {
-      width: 100%;
-      max-width: 320px;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 14px;
-      border: none;
-      margin: 10px auto;
-      cursor: pointer;
-      display: block;
-    }
-    .verify { background:#4da3ff; color:#000; }
-    .pay    { background:#ffd700; color:#000; }
-    .start  { background:#00ff99; color:#000; }
-    .disabled {
-      opacity: .4;
-      pointer-events: none;
-    }
-    #status {
-      margin-top: 18px;
-      font-size: 14px;
-      color: #bbb;
-      min-height: 20px;
-    }
+    body { background:#111;color:#fff;font-family:system-ui;text-align:center;padding:24px }
+    button { width:100%;max-width:320px;padding:14px;font-size:16px;border-radius:14px;border:none;margin:10px auto;display:block }
+    .verify{background:#4da3ff;color:#000}
+    .pay{background:#ffd700;color:#000}
+    .start{background:#00ff99;color:#000}
+    .disabled{opacity:.4;pointer-events:none}
+    #status{margin-top:15px;color:#bbb}
   </style>
 </head>
 <body>
 
-  <h2>📸 Selfie Mirror</h2>
+<h2>📸 Selfie Mirror</h2>
 
-  <button id="verifyBtn" class="verify">Verificar World ID</button>
-  <button id="payBtn" class="pay disabled">Pagar</button>
-  <button id="startBtn" class="start disabled">Comenzar experiencia</button>
+<button id="verify" class="verify">Verificar World ID</button>
+<button id="pay" class="pay disabled">Pagar</button>
+<button id="start" class="start disabled">Comenzar</button>
 
-  <div id="status"></div>
+<div id="status"></div>
 
-  <script type="module">
-    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm";
+<script type="module">
+import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm";
 
-    const verifyBtn = document.getElementById("verifyBtn");
-    const payBtn    = document.getElementById("payBtn");
-    const startBtn  = document.getElementById("startBtn");
-    const status    = document.getElementById("status");
+const verifyBtn = document.getElementById("verify");
+const payBtn = document.getElementById("pay");
+const startBtn = document.getElementById("start");
+const status = document.getElementById("status");
 
-    let verified = false;
-    let paid = false;
+let sessionId = null;
 
-    const ACTION_ID = "selfie-mirror-verify";
-    const RECEIVER_WALLET = "0x1f62e7890d5db2c94c280547876b050f5d1816c5";
+const WALLET = "0x1f62e7890d5db2c94c280547876b050f5d1816c5";
 
-    const setStatus = (msg) => status.innerText = msg;
+const setStatus = m => status.innerText = m;
 
-    // ---------- VERIFICACIÓN WORLD ID ----------
-    verifyBtn.onclick = async () => {
-      try {
-        setStatus("🔍 Verificando identidad...");
+// ===== VERIFICAR =====
+verifyBtn.onclick = async () => {
+  setStatus("Verificando identidad...");
+  const { finalPayload } = await MiniKit.commandsAsync.verify({
+    action: "selfie-mirror",
+    signal: "session"
+  });
 
-        const { finalPayload } = await MiniKit.commandsAsync.verify({
-          action: ACTION_ID,
-          signal: "selfie-mirror"
-        });
+  sessionId = finalPayload.nullifier_hash;
 
-        if (!finalPayload) throw new Error("Verificación cancelada");
+  await fetch("/api/verify-worldid", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(finalPayload)
+  });
 
-        console.log("WORLD ID:", finalPayload);
+  verifyBtn.classList.add("disabled");
+  payBtn.classList.remove("disabled");
+  setStatus("✅ Identidad verificada");
+};
 
-        verified = true;
-        verifyBtn.classList.add("disabled");
-        payBtn.classList.remove("disabled");
+// ===== PAGAR =====
+payBtn.onclick = async () => {
+  setStatus("Solicitando pago...");
+  const payment = await MiniKit.commandsAsync.sendPayment({
+    to: WALLET,
+    amount: "20.00",
+    token: "WLD",
+    reference: sessionId
+  });
 
-        setStatus("✅ Identidad verificada");
+  if (!payment?.success) return setStatus("Pago cancelado");
 
-      } catch (e) {
-        console.error(e);
-        setStatus("❌ Error en la verificación");
-      }
-    };
+  await fetch("/api/confirm-payment", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ nullifier_hash: sessionId, txHash: payment.txHash })
+  });
 
-    // ---------- PAGO ----------
-    payBtn.onclick = async () => {
-      try {
-        setStatus("💰 Solicitando pago...");
+  payBtn.classList.add("disabled");
+  startBtn.classList.remove("disabled");
+  setStatus("💰 Pago confirmado");
+};
 
-        const payment = await MiniKit.commandsAsync.sendPayment({
-          to: RECEIVER_WALLET,
-          amount: "1.00",
-          token: "USDC",
-          reference: "selfie-mirror"
-        });
-
-        if (!payment?.success) throw new Error("Pago cancelado");
-
-        console.log("PAGO:", payment);
-
-        paid = true;
-        payBtn.classList.add("disabled");
-        startBtn.classList.remove("disabled");
-
-        setStatus("💸 Pago confirmado");
-
-      } catch (e) {
-        console.error(e);
-        setStatus("❌ Pago cancelado");
-      }
-    };
-
-    // ---------- ACCIÓN FINAL ----------
-    startBtn.onclick = () => {
-      if (!verified || !paid) return;
-
-      setStatus("🚀 Iniciando experiencia...");
-      alert("📸 ACA ARRANCA TU SELFIE MIRROR");
-      // acá conectás cámara / IA / flujo real
-    };
-  </script>
+// ===== START =====
+startBtn.onclick = () => {
+  setStatus("🚀 Experiencia habilitada");
+  alert("ACÁ ARRANCA TU SELFIE MIRROR REAL");
+};
+</script>
 
 </body>
 </html>
