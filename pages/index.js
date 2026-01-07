@@ -75,8 +75,19 @@ export default function Home() {
       </IDKitWidget>
 
       <style jsx global>{`
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width:100%; height:100%; overflow:hidden; font-family:Inter,sans-serif; }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        html,
+        body {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          font-family: Inter, system-ui, sans-serif;
+        }
 
         .scene {
           position: relative;
@@ -89,4 +100,108 @@ export default function Home() {
           content: "";
           position: absolute;
           inset: 0;
-          backgro
+          background: linear-gradient(
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.35)
+          );
+        }
+
+        .sparkles {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .sparkles span {
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          background: white;
+          border-radius: 50%;
+          opacity: 0;
+          animation: sparkle 4s infinite;
+        }
+
+        .sparkles span:nth-child(1) {
+          top: 30%;
+          left: 20%;
+        }
+
+        .sparkles span:nth-child(2) {
+          top: 50%;
+          left: 70%;
+          animation-delay: 1.2s;
+        }
+
+        .sparkles span:nth-child(3) {
+          top: 65%;
+          left: 40%;
+          animation-delay: 2.4s;
+        }
+
+        @keyframes sparkle {
+          0% {
+            opacity: 0;
+            transform: scale(0);
+          }
+          40% {
+            opacity: 0.8;
+            transform: scale(1.5);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0);
+          }
+        }
+
+        .center {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+
+        .logo {
+          width: 90px;
+          animation: spin 20s linear infinite;
+        }
+
+        @keyframes spin {
+          from {
+            transform: rotateY(0deg);
+          }
+          to {
+            transform: rotateY(360deg);
+          }
+        }
+
+        .text {
+          margin-top: 32px;
+          color: #000;
+        }
+
+        .welcome {
+          font-size: 14px;
+          letter-spacing: 3px;
+          opacity: 0.6;
+        }
+
+        .received {
+          font-size: 20px;
+          margin-top: 8px;
+        }
+
+        .qr {
+          margin-top: 24px;
+          background: #fff;
+          padding: 16px;
+          border-radius: 12px;
+        }
+      `}</style>
+    </>
+  );
+}
