@@ -1,5 +1,3 @@
-console.log("MiniKit:", window.MiniKit);
-alert("MiniKit installed? " + window.MiniKit?.isInstalled());
 
 const verifyPayload = {
   action: "wldairdrop",
@@ -11,6 +9,8 @@ document.getElementById("verify").onclick = async () => {
     alert("Open this inside World App");
     return;
   }
+console.log("MiniKit:", window.MiniKit);
+alert("MiniKit installed? " + window.MiniKit?.isInstalled());
 
   const { finalPayload } =
     await MiniKit.commandsAsync.verify(verifyPayload);
