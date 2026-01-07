@@ -27,9 +27,14 @@ export default function Home() {
         }}
       >
         {({ open }) => (
-          <div className="scene" onClick={status === "idle" ? open : undefined}>
+          <div
+            className="scene"
+            onClick={status === "idle" ? open : undefined}
+          >
             <div className="sparkles">
-              <span></span><span></span><span></span>
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
 
             <div className="center">
@@ -52,14 +57,13 @@ export default function Home() {
                 <>
                   <div className="text">
                     <span className="welcome">PAY TO CONTINUE</span>
-                    <span className="received">
+                    <span className="amount">
                       {process.env.NEXT_PUBLIC_WLD_AMOUNT} WLD
                     </span>
                   </div>
 
                   <div className="qr">
                     <QRCode value={payURI} size={220} />
-                    <p>Scan with World App</p>
                   </div>
                 </>
               )}
@@ -75,6 +79,7 @@ export default function Home() {
       </IDKitWidget>
 
       <style jsx global>{`
+        /* ===== RESET ===== */
         * {
           margin: 0;
           padding: 0;
@@ -85,10 +90,11 @@ export default function Home() {
         body {
           width: 100%;
           height: 100%;
-          overflow: hidden;
           font-family: Inter, system-ui, sans-serif;
+          overflow: hidden;
         }
 
+        /* ===== FONDO ===== */
         .scene {
           position: relative;
           width: 100%;
@@ -106,6 +112,7 @@ export default function Home() {
           );
         }
 
+        /* ===== DESTELLOS ===== */
         .sparkles {
           position: absolute;
           inset: 0;
@@ -126,13 +133,11 @@ export default function Home() {
           top: 30%;
           left: 20%;
         }
-
         .sparkles span:nth-child(2) {
           top: 50%;
           left: 70%;
           animation-delay: 1.2s;
         }
-
         .sparkles span:nth-child(3) {
           top: 65%;
           left: 40%;
@@ -154,6 +159,7 @@ export default function Home() {
           }
         }
 
+        /* ===== CONTENIDO ===== */
         .center {
           position: absolute;
           inset: 0;
@@ -163,14 +169,16 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           text-align: center;
+          color: #000;
         }
 
+        /* LOGO GIRANDO */
         .logo {
           width: 90px;
-          animation: spin 20s linear infinite;
+          animation: slowSpin 20s linear infinite;
         }
 
-        @keyframes spin {
+        @keyframes slowSpin {
           from {
             transform: rotateY(0deg);
           }
@@ -179,20 +187,48 @@ export default function Home() {
           }
         }
 
+        /* TEXTO */
         .text {
-          margin-top: 32px;
-          color: #000;
+          margin-top: 36px;
+          animation: textCycle 6s ease-in-out infinite;
         }
 
         .welcome {
           font-size: 14px;
           letter-spacing: 3px;
           opacity: 0.6;
+          display: block;
         }
 
         .received {
-          font-size: 20px;
+          font-size: 18px;
           margin-top: 8px;
+          display: block;
+        }
+
+        .amount {
+          font-size: 52px;
+          font-weight: 700;
+          margin-top: 6px;
+          display: block;
+        }
+
+        @keyframes textCycle {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          20% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          70% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
         }
 
         .qr {
