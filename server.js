@@ -7,8 +7,8 @@ app.use(express.json());
 app.use(express.static(".")); // sirve index.html
 
 // 🔴 ENV
-const APP_ID = "app_staging_TU_APP_ID";
-const DEV_API_KEY = "TU_DEV_PORTAL_API_KEY";
+const APP_ID = "app_c24dee9dbb80d59bb5f91c9ec5042412";
+const DEV_API_KEY = "api_a2V5X2ViNDdiMzJkN2RhZjlkYzQyMGMyYzUwMDIyOWJiN2Q4OnNrXzk3NmU5MTMxMzk0NTIxNjM3MjUyOGZkN2VjZjgyZjRiZjFmMWFmMjViYWFiZmU1Zg";
 
 // VERIFY ID
 app.post("/api/verify", async (req, res) => {
