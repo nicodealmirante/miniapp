@@ -1,5 +1,5 @@
 const verifyPayload = {
-  action: "wld-airdrop",
+  action: "wldairdrop",
   signal: "session-1",
 };
 
