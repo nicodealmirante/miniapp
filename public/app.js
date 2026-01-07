@@ -1,4 +1,12 @@
+// === CONFIG IDKIT ===
+const APP_ID = "app_feaec177b55a0c5379ad8a2c149f5429"; // TU APP ID REAL
+const ACTION = "wldairdrop";           // MISMA action del portal
+const SIGNAL = "session-1";             // opcional
 
+// Inicializar IDKit
+MiniKit.configure({
+  app_id: APP_ID,
+});
 const verifyPayload = {
   action: "wldairdrop",
   signal: "session-1",
