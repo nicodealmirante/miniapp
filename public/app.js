@@ -40,3 +40,11 @@ alert("MiniKit installed? " + window.MiniKit?.isInstalled());
 
   out.textContent = JSON.stringify(await r.json(), null, 2);
 };
+
+MiniKit.subscribe(ResponseEvent.MiniAppVerifyAction, async (response) => {
+  if (response.status === 'error') {
+    console.log('Error payload', response)
+  } else {
+    // aquí manejás lo que devuelve la verificación
+  }
+});
