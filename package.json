@@ -1,17 +1,12 @@
 {
-  "name": "40wld",
+  "name": "selfie-mirror-miniapp",
   "version": "1.0.0",
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "NODE_ENV=production next start -H 0.0.0.0 -p $PORT"
-},
+  "scripts": {
+    "start": "npx serve public -l 3000"
+  },
   "dependencies": {
-    "next": "14.2.35",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "@worldcoin/idkit": "^1.4.0",
-    "qrcode.react": "^3.1.0"
+    "serve": "^14.2.0"
   }
 }
+
