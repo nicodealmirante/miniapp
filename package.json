@@ -1,16 +1,17 @@
 {
-  "name": "selfie-mirror-world",
+  "name": "40wld",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p $PORT"
   },
   "dependencies": {
-    "@worldcoin/idkit": "^1.5.0",
-    "next": "^14.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@worldcoin/idkit": "^1.4.0",
+    "qrcode.react": "^3.1.0"
   }
 }
