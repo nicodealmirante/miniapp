@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { IDKitWidget } from "@worldcoin/idkit";
-import "../styles/globals.css";
+
 
 export default function Home() {
   const [verified, setVerified] = useState(false);
