@@ -7,8 +7,8 @@ app.use(express.json());
 app.use(express.static(".")); // sirve index.html
 
 // 🔴 ENV
-const APP_ID = "app_c24dee9dbb80d59bb5f91c9ec5042412";
-const DEV_API_KEY = "api_a2V5X2ViNDdiMzJkN2RhZjlkYzQyMGMyYzUwMDIyOWJiN2Q4OnNrXzk3NmU5MTMxMzk0NTIxNjM3MjUyOGZkN2VjZjgyZjRiZjFmMWFmMjViYWFiZmU1Zg";
+const APP_ID = "app_feaec177b55a0c5379ad8a2c149f5429";
+const DEV_API_KEY = "api_a2V5X2ViNDdiMzJkN2RhZjlkYzQyMGMyYzUwMDIyOWJiN2Q4OnNrXzdhYjUzM2RlOWMyYTMyNTgyNmViYzBkY2NiNzVmMjA5NzE5ZjgwMTc5NjI1MjRhMg";
 
 // VERIFY ID
 app.post("/api/verify", async (req, res) => {
