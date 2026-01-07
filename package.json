@@ -2,11 +2,11 @@
   "name": "40wld",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start "
-  },
+"scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "NODE_ENV=production next start -H 0.0.0.0 -p $PORT"
+},
   "dependencies": {
     "next": "14.2.35",
     "react": "18.3.1",
