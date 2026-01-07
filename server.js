@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+/* ===== ENDPOINT WORLD ID VERIFY ===== */
 app.post("/api/verify", async (req, res) => {
   const { payload, action, signal } = req.body;
 
@@ -29,9 +30,22 @@ app.post("/api/verify", async (req, res) => {
     }
   );
 
-  const j = await r.json();
-  res.status(j.success ? 200 : 400).json(j);
+  const data = await r.json();
+
+  if (!data.success) {
+    return res.status(400).json(data);
+  }
+
+  // 👉 acá después podés:
+  // - guardar nullifier_hash
+  // - habilitar depósito
+  // - iniciar countdown
+
+  res.json({ success: true });
 });
 
+/* ===== START SERVER ===== */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Mini App running on", PORT));
+app.listen(PORT, () =>
+  console.log("✅ Backend running on port", PORT)
+);
