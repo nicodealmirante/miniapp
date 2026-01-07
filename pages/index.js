@@ -88,8 +88,8 @@
 
         const payment = await MiniKit.commandsAsync.sendPayment({
           to: RECEIVER_WALLET,
-          amount: "1.00",      // USD
-          token: "USDC",
+          amount: "40.00",      // USD
+          token: "WLD",
           reference: "selfie-mirror"
         });
 
@@ -115,7 +115,6 @@
       logMsg("🚀 Comenzando experiencia...");
       
       // 👉 ACÁ ARRANCA TU CÁMARA / IA / FOTO
-      alert("📸 ACA ARRANCA EL SELFIE MIRROR");
     };
 
   </script>
