@@ -2,83 +2,117 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>World MiniKit Verify</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <title>World Verify + Pay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      background: #0b0b0b;
-      color: #fff;
-      font-family: system-ui, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+      background:#0b0b0b; color:#fff; font-family:system-ui,sans-serif;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      height:100vh; margin:0;
     }
-
     button {
-      background: #6b5cff;
-      color: #fff;
-      border: none;
-      padding: 18px 28px;
-      font-size: 18px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
+      padding:16px 24px; border-radius:12px; border:0; cursor:pointer;
+      font-size:16px; font-weight:600; margin:8px;
     }
-
-    button:active {
-      transform: scale(0.97);
-    }
-
-    #log {
-      margin-top: 20px;
-      font-size: 14px;
-      opacity: 0.8;
-    }
+    #verify { background:#6b5cff; color:#fff; }
+    #pay { background:#00c389; color:#000; }
+    #log { margin-top:12px; font-size:14px; opacity:.85; }
   </style>
 </head>
 <body>
 
-  <button id="verifyBtn">Verify with World ID</button>
+  <button id="verify">Verify with World ID</button>
+  <button id="pay" disabled>Pay with World</button>
   <div id="log">Idle</div>
 
   <script type="module">
-    import { MiniKit } from "./node_modules/@worldcoin/minikit-js/dist/index.js";
+    import { MiniKit, Tokens, tokenToDecimals } from "./node_modules/@worldcoin/minikit-js/dist/index.js";
 
-    const log = (msg) => {
-      console.log(msg);
-      document.getElementById("log").innerText = msg;
-    };
+    const log = (t)=>document.getElementById("log").innerText=t;
 
-    // INIT MINIKIT
-    MiniKit.init({
-      appId: "app_feaec177b55a0c5379ad8a2c149f5429", 
-      // 👆 REEMPLAZAR POR TU APP ID REAL
-    });
+    // 🔴 REEMPLAZAR POR TU APP ID REAL
+    MiniKit.init({ appId: "app_staging_TU_APP_ID" });
 
-    log("MiniKit initialized");
+    let verifiedPayload = null;
 
-    document.getElementById("verifyBtn").addEventListener("click", async () => {
-      log("Verify clicked");
-
+    document.getElementById("verify").onclick = async () => {
       try {
-        const result = await MiniKit.commands.verify({
-          action: "wld",
-          signal: "hola",
+        log("Verifying...");
+        const { finalPayload } = await MiniKit.commandsAsync.verify({
+          action: "verify-user",               // MISMO que en el portal
+          signal: Date.now().toString(),        // único
         });
 
-        console.log("VERIFY RESULT:", result);
-        log("Verify success");
+        if (finalPayload.status === "error") {
+          log("Verify error");
+          return;
+        }
 
-      } catch (err) {
-        console.error("VERIFY ERROR:", err);
-        log("Verify failed");
+        // guardamos proof
+        verifiedPayload = finalPayload;
+
+        // enviamos a backend para validar
+        const r = await fetch("/api/verify", {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify({
+            payload: finalPayload,
+            action: "verify-user",
+          }),
+        });
+        const j = await r.json();
+        if (!j.success) {
+          log("Backend verify failed");
+          return;
+        }
+
+        log("Verified ✔");
+        document.getElementById("pay").disabled = false;
+
+      } catch(e) {
+        console.error(e);
+        log("Verify exception");
       }
-    });
-  </script>
+    };
 
+    document.getElementById("pay").onclick = async () => {
+      try {
+        log("Preparing payment...");
+
+        // iniciamos referencia en backend
+        const r = await fetch("/api/initiate-payment", { method:"POST" });
+        const { reference } = await r.json();
+
+        const { finalPayload } = await MiniKit.commandsAsync.pay({
+          reference,
+          to: "0xTU_WALLET_WHITELISTED", // wallet permitida en portal
+          tokens: [{
+            symbol: Tokens.WLD,
+            token_amount: tokenToDecimals(1, Tokens.WLD).toString(),
+          }],
+          description: "Selfie Mirror access",
+        });
+
+        if (finalPayload.status === "error") {
+          log("Payment cancelled");
+          return;
+        }
+
+        // confirmar pago en backend
+        const c = await fetch("/api/confirm-payment", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(finalPayload),
+        });
+        const cj = await c.json();
+
+        log(cj.success ? "Payment OK ✔" : "Payment failed");
+
+      } catch(e) {
+        console.error(e);
+        log("Payment exception");
+      }
+    };
+  </script>
 </body>
 </html>
