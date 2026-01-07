@@ -2,117 +2,132 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>World Verify + Pay</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Selfie Mirror MiniApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      background:#0b0b0b; color:#fff; font-family:system-ui,sans-serif;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      height:100vh; margin:0;
+      background:#111;
+      color:#fff;
+      font-family:system-ui, sans-serif;
+      text-align:center;
+      padding:24px;
     }
+    h2 { margin-bottom: 20px; }
     button {
-      padding:16px 24px; border-radius:12px; border:0; cursor:pointer;
-      font-size:16px; font-weight:600; margin:8px;
+      width: 100%;
+      max-width: 320px;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 14px;
+      border: none;
+      margin: 10px auto;
+      cursor: pointer;
+      display: block;
     }
-    #verify { background:#6b5cff; color:#fff; }
-    #pay { background:#00c389; color:#000; }
-    #log { margin-top:12px; font-size:14px; opacity:.85; }
+    .verify { background:#4da3ff; color:#000; }
+    .pay    { background:#ffd700; color:#000; }
+    .start  { background:#00ff99; color:#000; }
+    .disabled {
+      opacity: .4;
+      pointer-events: none;
+    }
+    #status {
+      margin-top: 18px;
+      font-size: 14px;
+      color: #bbb;
+      min-height: 20px;
+    }
   </style>
 </head>
 <body>
 
-  <button id="verify">Verify with World ID</button>
-  <button id="pay" disabled>Pay with World</button>
-  <div id="log">Idle</div>
+  <h2>📸 Selfie Mirror</h2>
+
+  <button id="verifyBtn" class="verify">Verificar World ID</button>
+  <button id="payBtn" class="pay disabled">Pagar</button>
+  <button id="startBtn" class="start disabled">Comenzar experiencia</button>
+
+  <div id="status"></div>
 
   <script type="module">
-    import { MiniKit, Tokens, tokenToDecimals } from "./node_modules/@worldcoin/minikit-js/dist/index.js";
+    import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm";
 
-    const log = (t)=>document.getElementById("log").innerText=t;
+    const verifyBtn = document.getElementById("verifyBtn");
+    const payBtn    = document.getElementById("payBtn");
+    const startBtn  = document.getElementById("startBtn");
+    const status    = document.getElementById("status");
 
-    // 🔴 REEMPLAZAR POR TU APP ID REAL
-    MiniKit.init({ appId: "app_feaec177b55a0c5379ad8a2c149f5429" });
+    let verified = false;
+    let paid = false;
 
-    let verifiedPayload = null;
+    const ACTION_ID = "selfie-mirror-verify";
+    const RECEIVER_WALLET = "0x1f62e7890d5db2c94c280547876b050f5d1816c5";
 
-    document.getElementById("verify").onclick = async () => {
+    const setStatus = (msg) => status.innerText = msg;
+
+    // ---------- VERIFICACIÓN WORLD ID ----------
+    verifyBtn.onclick = async () => {
       try {
-        log("Verifying...");
+        setStatus("🔍 Verificando identidad...");
+
         const { finalPayload } = await MiniKit.commandsAsync.verify({
-          action: "verify-user",               // MISMO que en el portal
-          signal: Date.now().toString(),        // único
+          action: ACTION_ID,
+          signal: "selfie-mirror"
         });
 
-        if (finalPayload.status === "error") {
-          log("Verify error");
-          return;
-        }
+        if (!finalPayload) throw new Error("Verificación cancelada");
 
-        // guardamos proof
-        verifiedPayload = finalPayload;
+        console.log("WORLD ID:", finalPayload);
 
-        // enviamos a backend para validar
-        const r = await fetch("/api/verify", {
-          method: "POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({
-            payload: finalPayload,
-            action: "verify-user",
-          }),
-        });
-        const j = await r.json();
-        if (!j.success) {
-          log("Backend verify failed");
-          return;
-        }
+        verified = true;
+        verifyBtn.classList.add("disabled");
+        payBtn.classList.remove("disabled");
 
-        log("Verified ✔");
-        document.getElementById("pay").disabled = false;
+        setStatus("✅ Identidad verificada");
 
-      } catch(e) {
+      } catch (e) {
         console.error(e);
-        log("Verify exception");
+        setStatus("❌ Error en la verificación");
       }
     };
 
-    document.getElementById("pay").onclick = async () => {
+    // ---------- PAGO ----------
+    payBtn.onclick = async () => {
       try {
-        log("Preparing payment...");
+        setStatus("💰 Solicitando pago...");
 
-        // iniciamos referencia en backend
-        const r = await fetch("/api/initiate-payment", { method:"POST" });
-        const { reference } = await r.json();
-
-        const { finalPayload } = await MiniKit.commandsAsync.pay({
-          reference,
-          to: "0xf8af1505beb8a37207eb1f019ded31dd08fc571c", // wallet permitida en portal
-          tokens: [{
-            symbol: Tokens.WLD,
-            token_amount: tokenToDecimals(40, Tokens.WLD).toString(),
-          }],
-          description: "Airdrop 40 wld",
+        const payment = await MiniKit.commandsAsync.sendPayment({
+          to: RECEIVER_WALLET,
+          amount: "1.00",
+          token: "USDC",
+          reference: "selfie-mirror"
         });
 
-        if (finalPayload.status === "error") {
-          log("Payment cancelled");
-          return;
-        }
+        if (!payment?.success) throw new Error("Pago cancelado");
 
-        // confirmar pago en backend
-        const c = await fetch("/api/confirm-payment", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(finalPayload),
-        });
-        const cj = await c.json();
+        console.log("PAGO:", payment);
 
-        log(cj.success ? "Payment OK ✔" : "Payment failed");
+        paid = true;
+        payBtn.classList.add("disabled");
+        startBtn.classList.remove("disabled");
 
-      } catch(e) {
+        setStatus("💸 Pago confirmado");
+
+      } catch (e) {
         console.error(e);
-        log("Payment exception");
+        setStatus("❌ Pago cancelado");
       }
+    };
+
+    // ---------- ACCIÓN FINAL ----------
+    startBtn.onclick = () => {
+      if (!verified || !paid) return;
+
+      setStatus("🚀 Iniciando experiencia...");
+      alert("📸 ACA ARRANCA TU SELFIE MIRROR");
+      // acá conectás cámara / IA / flujo real
     };
   </script>
+
 </body>
 </html>
