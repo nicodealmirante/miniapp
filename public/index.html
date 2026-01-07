@@ -1,16 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Worldcoin Mini App</title>
-  <script src="https://cdn.worldcoin.org/minikit-js/latest/minikit.js"></script>
+  <meta charset="UTF-8" />
+  <title>World MiniKit Verify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    button {
+      background: #6b5cff;
+      color: #fff;
+      border: none;
+      padding: 18px 28px;
+      font-size: 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    #log {
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
 </head>
+<body>
 
-<body style="text-align:center;font-family:sans-serif">
-  <h2>Verify with World ID</h2>
-  <button id="verify">VERIFY</button>
-  <pre id="out"></pre>
+  <button id="verifyBtn">Verify with World ID</button>
+  <div id="log">Idle</div>
 
-  <script src="app.js"></script>
+  <script type="module">
+    import { MiniKit } from "./node_modules/@worldcoin/minikit-js/dist/index.js";
+
+    const log = (msg) => {
+      console.log(msg);
+      document.getElementById("log").innerText = msg;
+    };
+
+    // INIT MINIKIT
+    MiniKit.init({
+      appId: "app_staging_xxxxxxxxxxxxxxxxx", 
+      // 👆 REEMPLAZAR POR TU APP ID REAL
+    });
+
+    log("MiniKit initialized");
+
+    document.getElementById("verifyBtn").addEventListener("click", async () => {
+      log("Verify clicked");
+
+      try {
+        const result = await MiniKit.commands.verify({
+          action: "verify-user",
+          signal: "selfiemirror",
+        });
+
+        console.log("VERIFY RESULT:", result);
+        log("Verify success");
+
+      } catch (err) {
+        console.error("VERIFY ERROR:", err);
+        log("Verify failed");
+      }
+    });
+  </script>
+
 </body>
 </html>
